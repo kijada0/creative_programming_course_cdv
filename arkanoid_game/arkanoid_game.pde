@@ -14,15 +14,16 @@ static final int arena_height = windows_height - (2 * (arena_margin + arena_bord
 
 static final int arena_x_center = (widows_width / 2);
 static final int arena_y_center = ((windows_height - bottom_bar_height) / 2);
-static final int bottom_bar_y_center = windows_height - (bottom_bar_height / 2) - arena_margin;
+static final int bottom_bar_y_center = windows_height - (bottom_bar_height / 2) - arena_border;
 
 static final int font_size = 32;
 static final String font_path = "KodeMono.ttf";
 
 static final int text_box_width = 200;
 static final int button_width = 100;
-static final int button_height = 40;
+static final int button_height = 50;
 static final int text_box_stroke = 4;
+static final int bottom_bar_top_y = bottom_bar_y_center - button_height / 2;
 
 // -------------------------------------------------------------------------------- //
 
@@ -32,7 +33,7 @@ static final int platform_height = 9;
 
 class Platform {
     int x = arena_x_center;
-    int y = windows_height - bottom_bar_height - (arena_margin + arena_border + platform_height);
+    int y = arena_height + (2 * (arena_margin + arena_border)) - (4 * arena_margin);
 }
 
 Platform platform = new Platform();
@@ -167,22 +168,17 @@ void draw_bottom_bar(){
     font = createFont(font_path, font_size);
     String text;
 
-    //button center line
-    stroke(#0000FF);
-    strokeWeight(2);
-    line(0, bottom_bar_y_center, widows_width, bottom_bar_y_center);
-
     // Lives
     text = "Lives: " + remaining_lives;
-    draw_rectange_with_text(text, font, arena_margin, bottom_bar_y_center - button_height / 2, text_box_width, bottom_bar_height);
+    draw_rectange_with_text(text, font, arena_margin, bottom_bar_top_y, text_box_width, button_height);
 
     // Score
-    text = "Score: " + score;
-    draw_rectange_with_text(text, font, width - (arena_margin + text_box_width), bottom_bar_y_center - button_height / 2, text_box_width, bottom_bar_height);
+    text = String.format("Score: %2d", score);
+    draw_rectange_with_text(text, font, width - (arena_margin + text_box_width), bottom_bar_top_y, text_box_width, button_height);
 
     // Buttons
-    start_button_state = draw_button("START", font, arena_x_center - (button_width / 2), windows_height - bottom_bar_height + (bottom_bar_height / 2), button_width, button_height);
-    reset_button_state = draw_button("RESET", font, arena_x_center - (button_width / 2) + 150, windows_height - bottom_bar_height + (bottom_bar_height / 2), button_width, button_height);
+    start_button_state = draw_button("START", font, arena_x_center - button_width - arena_margin, bottom_bar_top_y, button_width, button_height);
+    reset_button_state = draw_button("RESET", font, arena_x_center + arena_margin, bottom_bar_top_y, button_width, button_height);
 }
 
 void draw_rectange_with_text(String text, PFont font, int x, int y, int w, int h){

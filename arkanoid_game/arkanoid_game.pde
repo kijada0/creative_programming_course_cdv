@@ -47,10 +47,10 @@ Platform platform = new Platform();
 // -------------------------------------------------------------------------------- //
 
 static final int brick_rows = 5;
-static final int brick_cols = 9;
+static final int brick_cols = 8;
 
 static final int brick_margin = 0;
-static final int brick_width = (arena_width - (brick_margin * (brick_cols - 1)) - (2 * arena_border) - (arena_margin / 2)) / brick_cols;
+static final int brick_width = (arena_width - (brick_margin * (brick_cols - 1))) / brick_cols;
 static final int brick_height = 32;
 
 static final int brick_stroke = 2;
@@ -68,8 +68,8 @@ Brick[] bricks = new Brick[(brick_rows * brick_cols)];
 int ball_speed = 5;
 int ball_size = 20;
 
-int deviation_factor = 15;
-int move_away_distance = 2;
+int deviation_factor = 60;
+int move_away_distance = 5;
 
 class Ball{
     float x = arena_x_center;
@@ -121,7 +121,6 @@ void draw(){
 // -------------------------------------------------------------------------------- //
 
 void generate_bricks() {
-    System.out.printf("Generating bricks... \n");
     int index = 0;
     int wall_width = brick_cols * (brick_width + brick_margin) - brick_margin;
     int wall_height = brick_rows * (brick_height + brick_margin) - brick_margin;
@@ -331,10 +330,16 @@ void draw_ball() {
 }
 
 void handle_ball_collision_with_arena() {
+    // Define a minimum bounce angle (in degrees)
+    float min_bounce_angle = 30.0;
+
     // left wall
     if (ball.x < arena_margin + arena_border && last_bounce_element_id != 10) {
         ball.x = arena_margin + arena_border + move_away_distance;
         ball.heading = 180 - ball.heading;
+        if (abs(ball.heading) < min_bounce_angle) {
+            ball.heading = min_bounce_angle;
+        }
         last_bounce_element_id = 10;
     }
 
@@ -342,6 +347,9 @@ void handle_ball_collision_with_arena() {
     if (ball.x > widows_width - (arena_margin + arena_border) && last_bounce_element_id != 11) {
         ball.x = widows_width - (arena_margin + arena_border) - move_away_distance;
         ball.heading = 180 - ball.heading;
+        if (abs(ball.heading) < min_bounce_angle) {
+            ball.heading = min_bounce_angle;
+        }
         last_bounce_element_id = 11;
     }
 
@@ -349,13 +357,19 @@ void handle_ball_collision_with_arena() {
     if (ball.y < arena_margin + arena_border && last_bounce_element_id != 12) {
         ball.y = arena_margin + arena_border + move_away_distance;
         ball.heading = 360 - ball.heading;
+        if (abs(ball.heading) < min_bounce_angle) {
+            ball.heading = min_bounce_angle;
+        }
         last_bounce_element_id = 12;
     }
     
     // bottom wall
     if (ball.y > (arena_height + arena_margin + arena_border) && last_bounce_element_id != 13) {
-        ball.y = arena_height - (ball_size / 2) - (platform_height / 2) - move_away_distance;
+        ball.y = platform.y - (platform_height / 2) - (ball_size / 2) - (move_away_distance);
         ball.heading = 360 - ball.heading;
+        if (abs(ball.heading) < min_bounce_angle) {
+            ball.heading = min_bounce_angle;
+        }
         remaining_lives--;
 
         if (remaining_lives == 0) {
@@ -364,6 +378,7 @@ void handle_ball_collision_with_arena() {
         last_bounce_element_id = 13;
     }
 }
+
 
 void handle_ball_collision_with_platform() {
     if(last_bounce_element_id == 20){
@@ -396,7 +411,7 @@ void handle_ball_collision_with_platform() {
 float calculate_ball_reflection_angle(float distance_from_center){
     float deviation_angle = (float)(distance_from_center / (float)(platform_width /2)) * (float)deviation_factor;
 
-    float reflection_angle = 180 + ball.heading;
+    float reflection_angle = 360 - ball.heading;
     reflection_angle += deviation_angle;
 
     if(reflection_angle < 0){
@@ -458,6 +473,8 @@ void handle_ball_collision_with_bricks() {
                     }
 
                     last_bounce_element_id = 100 + index;
+                    
+                    return;
                 }
             }
             index++;
